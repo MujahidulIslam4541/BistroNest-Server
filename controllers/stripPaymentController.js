@@ -34,4 +34,14 @@ const paymentHistory = async (req, res) => {
   res.send({ paymentResult, deleteResult });
 };
 
-module.exports = { stripePaymentIntent, paymentHistory };
+const allPayment = async (req, res) => {
+  const query = { email: req.params.email };
+
+  if (req.params.email !== req.decoded.email) {
+    return res.status(404).send("UnAuthorized Access");
+  }
+  const result = await paymentCollection.find(query).toArray();
+  res.send(result);
+};
+
+module.exports = { stripePaymentIntent, paymentHistory, allPayment };
