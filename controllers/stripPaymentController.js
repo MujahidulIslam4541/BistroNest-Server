@@ -4,6 +4,8 @@ const { ObjectId } = require("mongodb");
 const stripe = Stripe(process.env.PAYMENT_SECRET_KEY);
 const paymentCollection = client.db("bistroNestDb").collection("payments");
 const cartCollection = client.db("bistroNestDb").collection("carts");
+const menuCollection = client.db("bistroNestDb").collection("menu");
+const userCollection = client.db("bistroNestDb").collection("users");
 
 const stripePaymentIntent = async (req, res) => {
   try {
@@ -44,4 +46,35 @@ const allPayment = async (req, res) => {
   res.send(result);
 };
 
-module.exports = { stripePaymentIntent, paymentHistory, allPayment };
+const adminState = async (req, res) => {
+  const users = await userCollection.countDocuments();
+  const menuItems = await menuCollection.countDocuments();
+  const orders = await paymentCollection.countDocuments();
+
+  //   this is not the best wye
+  //   const payments = await paymentCollection.find().toArray();
+  //   const revenue = payments.reduce((total, item) => total + item.price, 0);
+
+  const result = await paymentCollection.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: "$price" },
+      },
+    },
+  ]).toArray()
+  const revenue=result[0]?.totalRevenue||0
+  res.send({
+    users,
+    menuItems,
+    orders,
+    revenue,
+  });
+};
+
+module.exports = {
+  stripePaymentIntent,
+  paymentHistory,
+  allPayment,
+  adminState,
+};
