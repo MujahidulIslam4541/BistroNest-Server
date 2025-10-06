@@ -1,9 +1,8 @@
-import { stripPaymentIntent } from '../controllers/stripPaymentController';
+const express = require("express");
+const { stripePaymentIntent } = require("../controllers/stripPaymentController");
 
-const express=require('express')
-const router=express.Router();
+const router = express.Router();
 
-router.post('/create-payment-intent',stripPaymentIntent)
+router.post("/create-payment-intent", stripePaymentIntent);
 
-
-export default router;
+module.exports = router;
