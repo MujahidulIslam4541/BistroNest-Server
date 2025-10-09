@@ -55,15 +55,17 @@ const adminState = async (req, res) => {
   //   const payments = await paymentCollection.find().toArray();
   //   const revenue = payments.reduce((total, item) => total + item.price, 0);
 
-  const result = await paymentCollection.aggregate([
-    {
-      $group: {
-        _id: null,
-        totalRevenue: { $sum: "$price" },
+  const result = await paymentCollection
+    .aggregate([
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$price" },
+        },
       },
-    },
-  ]).toArray()
-  const revenue=result[0]?.totalRevenue||0
+    ])
+    .toArray();
+  const revenue = result[0]?.totalRevenue || 0;
   res.send({
     users,
     menuItems,
@@ -72,9 +74,39 @@ const adminState = async (req, res) => {
   });
 };
 
+const orderState = async (req, res) => {
+  const result = await paymentCollection
+    .aggregate([
+      {
+        $unwind: "$menuItemIds",
+      },
+      {
+        $lookup: {
+          from: "menu",
+          localField: "menuItemIds",
+          foreignField: "_id",
+          as: "menuItems",
+        },
+      },
+      {
+        $unwind: "$menuItems",
+      },
+      {
+        $group: {
+          _id: "$menuItems.category",
+          quantity: { $sum: 1 },
+          revenue: { $sum: "$menuItems.price" },
+        },
+      },
+    ])
+    .toArray();
+  res.send(result);
+};
+
 module.exports = {
   stripePaymentIntent,
   paymentHistory,
   allPayment,
   adminState,
+  orderState,
 };
