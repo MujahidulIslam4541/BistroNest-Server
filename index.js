@@ -20,9 +20,9 @@ app.use(express.json());
 // MongoDB connection
 async function run() {
   try {
-    await client.connect();
-    await client.db("admin").command({ ping: 1 });
-    console.log("✅ Connected to MongoDB successfully!");
+    // await client.connect();
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("✅ Connected to MongoDB successfully!");
   } catch (error) {
     console.error("❌ MongoDB Connection Error:", error.message);
   }
