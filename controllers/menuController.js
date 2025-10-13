@@ -35,7 +35,6 @@ exports.getMenuWithPagination = async (req, res) => {
       totalPages,
     });
 
-    // console.log(success,items,page,perPage,total,totalPages)
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error" });

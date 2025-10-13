@@ -15,9 +15,37 @@ exports.postUser = async (req, res) => {
 };
 
 // GET :get all Users in database
+// exports.getAllUsers = async (req, res) => {
+//   const users = await userCollection.find().toArray();
+//   res.send(users);
+// };
+
 exports.getAllUsers = async (req, res) => {
-  const users = await userCollection.find().toArray();
-  res.send(users);
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const users = await userCollection
+      .find()
+      .sort()
+      .skip(skip)
+      .limit(limit).toArray();
+
+    const total = await userCollection.countDocuments();
+
+    res.json({
+      success: true,
+      data: {
+        users,
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 };
 
 // DELETE: Delete a user from the database
@@ -54,15 +82,14 @@ exports.getAdmin = async (req, res) => {
   res.send({ admin });
 };
 
-
 // use verify admin after verify token
-exports.verifyAdmin= async(req,res,next)=>{
-    const email=req.decoded.email;
-    const query={email:email}
-    const user=await userCollection.findOne(query)
-    const isAdmin=user?.role==="admin"
-    if(!isAdmin){
-      return res.status(403).send({message:"Forbidden  Access"})
-    }
-    next()
-}
+exports.verifyAdmin = async (req, res, next) => {
+  const email = req.decoded.email;
+  const query = { email: email };
+  const user = await userCollection.findOne(query);
+  const isAdmin = user?.role === "admin";
+  if (!isAdmin) {
+    return res.status(403).send({ message: "Forbidden  Access" });
+  }
+  next();
+};
