@@ -12,6 +12,7 @@ const cartRoute = require("./routes/cartRoutes");
 const userRoute = require("./routes/userRoutes");
 const jwtRoute = require("./routes/jwtRoutes");
 const stripePaymentRoutes = require("./routes/stripPaymentRoutes");
+const bookingRoutes=require('./routes/bookingRoutes')
 
 // middleware
 app.use(cors());
@@ -36,6 +37,7 @@ app.use(reviewsRoute);
 app.use(cartRoute);
 app.use(jwtRoute);
 app.use(stripePaymentRoutes);
+app.use(bookingRoutes)
 
 app.get("/", (req, res) => {
   res.send("BistroNest server is running ✅");
