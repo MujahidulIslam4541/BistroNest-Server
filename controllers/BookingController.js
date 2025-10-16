@@ -3,8 +3,8 @@ const bookingController = client.db("bistroNestDb").collection("booking");
 
 exports.bookingPost = async (req, res) => {
   try {
-    // const userId = req.user._id; 
-    const booking = { ...req.body }; 
+    const userId = req.decoded._id
+    const booking = { ...req.body, userId }; 
     const result = await bookingController.insertOne(booking); 
     res.status(201).json(result);
   } catch (error) {
