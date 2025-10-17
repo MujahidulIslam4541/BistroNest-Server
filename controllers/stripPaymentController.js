@@ -99,17 +99,41 @@ const orderState = async (req, res) => {
         },
       },
       {
-        $project:{
-          _id:0,
-          category:"$_id",
-          quantity:"$quantity",
-          revenue:"$revenue"
-        }
-      }
+        $project: {
+          _id: 0,
+          category: "$_id",
+          quantity: "$quantity",
+          revenue: "$revenue",
+        },
+      },
     ])
     .toArray();
   res.send(result);
 };
+
+const cancelOrder = async (req, res) => {
+  try {
+    const bookingId = req.params.id;
+    const userEmail = req.decoded.email; 
+
+    const result = await paymentCollection.deleteOne({
+      _id: new ObjectId(bookingId),
+      email: userEmail, 
+    });
+
+    if (result.deletedCount === 0) {
+      return res
+        .status(404)
+        .json({ message: "Order not found or you are not authorized." });
+    }
+
+    res.status(200).json({ message: "Order cancelled successfully." });
+  } catch (error) {
+    console.error("Cancel Order Error:", error);
+    res.status(500).json({ message: "Something went wrong while cancelling the order." });
+  }
+};
+
 
 module.exports = {
   stripePaymentIntent,
@@ -117,4 +141,5 @@ module.exports = {
   allPayment,
   adminState,
   orderState,
+  cancelOrder
 };
