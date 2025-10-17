@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post("/create-payment-intent", stripePaymentIntent);
 router.post("/payment", paymentHistory);
-router.get("/payments/:email", verifyToken, allPayment);
+router.get("/payments", verifyToken, allPayment);
 router.get("/admin-state", verifyToken, verifyAdmin, adminState);
 router.get("/order-state", verifyToken, verifyAdmin, orderState);
 

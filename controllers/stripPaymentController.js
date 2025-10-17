@@ -37,13 +37,23 @@ const paymentHistory = async (req, res) => {
 };
 
 const allPayment = async (req, res) => {
-  const query = { email: req.params.email };
+  try {
+    const email = req.decoded.email;
+    const user = await userCollection.findOne({ email: email });
 
-  if (req.params.email !== req.decoded.email) {
-    return res.status(404).send("UnAuthorized Access");
+    let query = {};
+    if (user?.role === "admin") {
+      query = {}; 
+    } else {
+      query = { email: email };
+    }
+
+    const result = await paymentCollection.find(query).toArray();
+    res.send(result);
+  } catch (error) {
+    console.error("Error fetching payments:", error);
+    res.status(500).send({ message: "Failed to load payments" });
   }
-  const result = await paymentCollection.find(query).toArray();
-  res.send(result);
 };
 
 const adminState = async (req, res) => {
@@ -114,11 +124,11 @@ const orderState = async (req, res) => {
 const cancelOrder = async (req, res) => {
   try {
     const bookingId = req.params.id;
-    const userEmail = req.decoded.email; 
+    const userEmail = req.decoded.email;
 
     const result = await paymentCollection.deleteOne({
       _id: new ObjectId(bookingId),
-      email: userEmail, 
+      email: userEmail,
     });
 
     if (result.deletedCount === 0) {
@@ -130,10 +140,11 @@ const cancelOrder = async (req, res) => {
     res.status(200).json({ message: "Order cancelled successfully." });
   } catch (error) {
     console.error("Cancel Order Error:", error);
-    res.status(500).json({ message: "Something went wrong while cancelling the order." });
+    res
+      .status(500)
+      .json({ message: "Something went wrong while cancelling the order." });
   }
 };
-
 
 module.exports = {
   stripePaymentIntent,
@@ -141,5 +152,5 @@ module.exports = {
   allPayment,
   adminState,
   orderState,
-  cancelOrder
+  cancelOrder,
 };
