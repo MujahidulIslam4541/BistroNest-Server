@@ -7,10 +7,14 @@ const {
   makeAdmin,
   getAdmin,
   verifyAdmin,
+  updateUserProfile,
+  getUserProfile,
 } = require("../controllers/userController");
 const { verifyToken } = require("../controllers/jwtController");
 
 router.post("/user", postUser);
+router.patch("/userProfile/:email", verifyToken, updateUserProfile);
+router.get("/userProfile/:email", verifyToken, getUserProfile);
 router.get("/users", verifyToken,verifyAdmin, getAllUsers);
 router.delete("/user/:id", verifyToken,verifyAdmin, deleteUser);
 router.patch("/user/admin/:id", verifyToken, verifyAdmin, makeAdmin); // Assuming makeAdmin is defined in userController

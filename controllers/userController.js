@@ -15,10 +15,21 @@ exports.postUser = async (req, res) => {
 };
 
 // GET :get all Users in database
-// exports.getAllUsers = async (req, res) => {
-//   const users = await userCollection.find().toArray();
-//   res.send(users);
-// };
+exports.getUserProfile = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const user = await userCollection.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Get User Profile Error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -30,7 +41,8 @@ exports.getAllUsers = async (req, res) => {
       .find()
       .sort()
       .skip(skip)
-      .limit(limit).toArray();
+      .limit(limit)
+      .toArray();
 
     const total = await userCollection.countDocuments();
 
@@ -54,6 +66,31 @@ exports.deleteUser = async (req, res) => {
   const query = { _id: new ObjectId(id) };
   const result = await userCollection.deleteOne(query);
   res.send(result);
+};
+
+// update user  profile
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const { displayName, photoURL } = req.body;
+    const updateData = {};
+    if (displayName) updateData.displayName = displayName;
+    if (photoURL) updateData.photoURL = photoURL;
+
+    const result = await userCollection.updateOne(
+      { email },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
 };
 
 // Make Admin user
