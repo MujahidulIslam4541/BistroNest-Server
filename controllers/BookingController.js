@@ -1,6 +1,8 @@
 const { ObjectId } = require("mongodb");
 const client = require("../config/db");
 const bookingController = client.db("bistroNestDb").collection("booking");
+const reviewsCollection = client.db("bistroNestDb").collection("reviews");
+const paymentCollection = client.db("bistroNestDb").collection("payments");
 
 exports.bookingPost = async (req, res) => {
   try {
@@ -25,12 +27,10 @@ exports.getBooking = async (req, res) => {
   }
 };
 
-
-
 exports.deleteBooking = async (req, res) => {
   try {
-    const bookingId = req.params.id; 
-    const userId = req.decoded._id; 
+    const bookingId = req.params.id;
+    const userId = req.decoded._id;
     const result = await bookingController.deleteOne({
       _id: new ObjectId(bookingId),
       userId: userId,
@@ -45,5 +45,23 @@ exports.deleteBooking = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to delete booking", error });
+  }
+};
+
+// user states
+exports.userState = async (req, res) => {
+  try {
+    const userId = req.decoded._id;
+    const bookingsCount = await bookingController.countDocuments({ userId });
+    const reviewsCount = await reviewsCollection.countDocuments({ userId });
+    const ordersCount = await paymentCollection.countDocuments({ userId });
+    res.status(200).json({
+      bookings: bookingsCount,
+      orders: ordersCount,
+      reviews: reviewsCount,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to get user stats", error });
   }
 };
