@@ -23,11 +23,11 @@ exports.getBooking = async (req, res) => {
     const user = await userCollection.findOne({ email: email });
 
     if (!user) {
-       return res.status(403).json({ message: "user Not Authorized" });
+      return res.status(403).json({ message: "user Not Authorized" });
     }
     let query = {};
     if (user.role !== "admin") {
-      query = { email }; 
+      query = { email };
     }
 
     const result = await bookingController.find(query).sort({ _id: -1 }).toArray();
@@ -72,5 +72,26 @@ exports.userState = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to get user stats", error });
+  }
+};
+
+ exports.bookingStatusUpdate = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body;
+
+    const filter = { _id: new ObjectId(id) };
+    const updatedDoc = {
+      $set: {
+        status: status,
+      },
+    };
+
+    const result = await bookingController.updateOne(filter, updatedDoc);
+    if (result.modifiedCount > 0) {
+      res.status(200).json({ message: "booking status  Update successfully." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong .booking status not updated." });
   }
 };
