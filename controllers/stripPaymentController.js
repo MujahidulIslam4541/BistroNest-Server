@@ -43,12 +43,12 @@ const allPayment = async (req, res) => {
 
     let query = {};
     if (user?.role === "admin") {
-      query = {}; 
+      query = {};
     } else {
       query = { email: email };
     }
 
-    const result = await paymentCollection.find(query).toArray();
+    const result = await paymentCollection.find(query).sort({ _id: -1 }).toArray();
     res.send(result);
   } catch (error) {
     console.error("Error fetching payments:", error);
@@ -132,17 +132,34 @@ const cancelOrder = async (req, res) => {
     });
 
     if (result.deletedCount === 0) {
-      return res
-        .status(404)
-        .json({ message: "Order not found or you are not authorized." });
+      return res.status(404).json({ message: "Order not found or you are not authorized." });
     }
 
     res.status(200).json({ message: "Order cancelled successfully." });
   } catch (error) {
     console.error("Cancel Order Error:", error);
-    res
-      .status(500)
-      .json({ message: "Something went wrong while cancelling the order." });
+    res.status(500).json({ message: "Something went wrong while cancelling the order." });
+  }
+};
+
+const orderStatusUpdate = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body;
+
+    const filter = { _id: new ObjectId(id) };
+    const updatedDoc = {
+      $set: {
+        status: status,
+      },
+    };
+
+    const result = await paymentCollection.updateOne(filter, updatedDoc);
+    if (result.modifiedCount > 0) {
+      res.status(200).json({ message: "Order status  Update successfully." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong .order status not updated." });
   }
 };
 
@@ -153,4 +170,5 @@ module.exports = {
   adminState,
   orderState,
   cancelOrder,
+  orderStatusUpdate,
 };

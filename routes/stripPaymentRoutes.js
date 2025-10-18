@@ -6,6 +6,7 @@ const {
   adminState,
   orderState,
   cancelOrder,
+  orderStatusUpdate,
 } = require("../controllers/stripPaymentController");
 const { verifyToken } = require("../controllers/jwtController");
 const { verifyAdmin } = require("../controllers/userController");
@@ -20,5 +21,7 @@ router.get("/order-state", verifyToken, verifyAdmin, orderState);
 
 // cancel order
 router.delete("/cancelOrder/:id", verifyToken, cancelOrder);
+// order status update
+router.patch('/order/:id',verifyToken,verifyAdmin,orderStatusUpdate)
 
 module.exports = router;
