@@ -3,6 +3,7 @@ const client = require("../config/db");
 const bookingController = client.db("bistroNestDb").collection("booking");
 const reviewsCollection = client.db("bistroNestDb").collection("reviews");
 const paymentCollection = client.db("bistroNestDb").collection("payments");
+const userCollection = client.db("bistroNestDb").collection("users");
 
 exports.bookingPost = async (req, res) => {
   try {
@@ -18,9 +19,19 @@ exports.bookingPost = async (req, res) => {
 
 exports.getBooking = async (req, res) => {
   try {
-    const userId = req.decoded._id;
-    const result = await bookingController.find({ userId }).toArray();
-    res.status(201).json(result);
+    const email = req.decoded.email;
+    const user = await userCollection.findOne({ email: email });
+
+    if (!user) {
+       return res.status(403).json({ message: "user Not Authorized" });
+    }
+    let query = {};
+    if (user.role !== "admin") {
+      query = { email }; 
+    }
+
+    const result = await bookingController.find(query).sort({ _id: -1 }).toArray();
+    res.status(200).json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to get bookings", error });
@@ -36,9 +47,7 @@ exports.deleteBooking = async (req, res) => {
       userId: userId,
     });
     if (result.deletedCount === 0) {
-      return res
-        .status(404)
-        .json({ message: "Booking not found or unauthorized" });
+      return res.status(404).json({ message: "Booking not found or unauthorized" });
     }
 
     res.status(200).json({ message: "Booking deleted successfully" });
