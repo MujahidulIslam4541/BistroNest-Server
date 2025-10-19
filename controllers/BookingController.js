@@ -22,6 +22,10 @@ exports.getBooking = async (req, res) => {
     const email = req.decoded.email;
     const user = await userCollection.findOne({ email: email });
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     if (!user) {
       return res.status(403).json({ message: "user Not Authorized" });
     }
@@ -30,8 +34,19 @@ exports.getBooking = async (req, res) => {
       query = { email };
     }
 
-    const result = await bookingController.find(query).sort({ _id: -1 }).toArray();
-    res.status(200).json(result);
+    const result = await bookingController.find(query).sort({ _id: -1 }).skip(skip).limit(limit).toArray();
+
+    const total = await bookingController.countDocuments(query);
+
+    res.send({
+      success: true,
+      data: {
+        result,
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to get bookings", error });
@@ -75,7 +90,7 @@ exports.userState = async (req, res) => {
   }
 };
 
- exports.bookingStatusUpdate = async (req, res) => {
+exports.bookingStatusUpdate = async (req, res) => {
   try {
     const id = req.params.id;
     const { status } = req.body;
