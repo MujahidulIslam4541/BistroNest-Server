@@ -36,10 +36,34 @@ const paymentHistory = async (req, res) => {
   res.send({ paymentResult, deleteResult });
 };
 
+// const allPayment = async (req, res) => {
+//   try {
+//     const email = req.decoded.email;
+//     const user = await userCollection.findOne({ email: email });
+
+//     let query = {};
+//     if (user?.role === "admin") {
+//       query = {};
+//     } else {
+//       query = { email: email };
+//     }
+
+//     const result = await paymentCollection.find(query).sort({ _id: -1 }).toArray();
+//     res.send(result);
+//   } catch (error) {
+//     console.error("Error fetching payments:", error);
+//     res.status(500).send({ message: "Failed to load payments" });
+//   }
+// };
+
 const allPayment = async (req, res) => {
   try {
     const email = req.decoded.email;
     const user = await userCollection.findOne({ email: email });
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
     let query = {};
     if (user?.role === "admin") {
@@ -48,8 +72,19 @@ const allPayment = async (req, res) => {
       query = { email: email };
     }
 
-    const result = await paymentCollection.find(query).sort({ _id: -1 }).toArray();
-    res.send(result);
+    const result = await paymentCollection.find(query).sort({ _id: -1 }).skip(skip).limit(limit).toArray();
+
+    const total = await paymentCollection.countDocuments(query);
+
+    res.send({
+      success: true,
+      data: {
+        result,
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching payments:", error);
     res.status(500).send({ message: "Failed to load payments" });
