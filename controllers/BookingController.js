@@ -12,7 +12,6 @@ exports.bookingPost = async (req, res) => {
     const result = await bookingController.insertOne(booking);
     res.status(201).json(result);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Booking failed", error });
   }
 };
@@ -48,7 +47,6 @@ exports.getBooking = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Failed to get bookings", error });
   }
 };
@@ -67,7 +65,6 @@ exports.deleteBooking = async (req, res) => {
 
     res.status(200).json({ message: "Booking deleted successfully" });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Failed to delete booking", error });
   }
 };
@@ -85,7 +82,6 @@ exports.userState = async (req, res) => {
       reviews: reviewsCount,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Failed to get user stats", error });
   }
 };

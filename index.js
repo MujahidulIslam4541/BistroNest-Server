@@ -15,7 +15,7 @@ const stripePaymentRoutes = require("./routes/stripPaymentRoutes");
 const bookingRoutes=require('./routes/bookingRoutes')
 
 // middleware
-app.use(cors());
+app.use(cors(origin=['http://localhost:5173','https://bistronest-68b26.web.app']));
 app.use(express.json());
 
 // MongoDB connection

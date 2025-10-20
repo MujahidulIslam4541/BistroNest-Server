@@ -9,8 +9,9 @@ exports.postCart = async (req, res) => {
   res.send(result);
 };
 
-// GET: Get all cart items
 
+
+// GET: Get all cart items
 exports.getCart = async (req, res) => {
   const email = req.query.email;
   const query = { email: email };
@@ -19,7 +20,6 @@ exports.getCart = async (req, res) => {
 };
 
 // DELETE :delete one cart item
-
 exports.deleteCart=async(req,res)=>{
   const id=req.params.id;
   const query = { _id: new ObjectId(id) };

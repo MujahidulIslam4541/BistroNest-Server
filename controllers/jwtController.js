@@ -24,7 +24,6 @@ exports.jwtPost = async (req, res) => {
 
     res.status(200).send({ token });
   } catch (error) {
-    console.error(error);
     res.status(500).send({ message: "Token generation failed", error });
   }
 };
@@ -46,7 +45,6 @@ exports.verifyToken = (req, res, next) => {
       return res.status(403).send({ message: "Forbidden Access" });
     }
     req.decoded = decoded;
-    // console.log("Decoded JWT:", decoded);
     next();
   });
 };
